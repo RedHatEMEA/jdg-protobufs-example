@@ -8,7 +8,7 @@ public class MarketPriceEntry implements Serializable {
 	 * Serializeable UID
 	 */
 	private static final long serialVersionUID = 1874488008945905488L;
-	
+
 	private double price;
 	private String commodity;
 
@@ -33,12 +33,18 @@ public class MarketPriceEntry implements Serializable {
 		this.commodity = commodity;
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public String toString() {
 		return "MarketPriceEntry [price=" + price + ", commodity=" + commodity
 				+ "]";
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -51,6 +57,9 @@ public class MarketPriceEntry implements Serializable {
 		return result;
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -76,7 +85,5 @@ public class MarketPriceEntry implements Serializable {
 		}
 		return true;
 	}
-	
-	
 
 }

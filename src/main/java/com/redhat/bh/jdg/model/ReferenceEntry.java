@@ -17,16 +17,13 @@ public class ReferenceEntry implements Serializable {
 		this.dataType = dataType;
 	}
 
-
 	public String getValue() {
 		return value;
 	}
 
-
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 
 	public String getDataType() {
 		return dataType;
@@ -36,12 +33,18 @@ public class ReferenceEntry implements Serializable {
 		this.dataType = dataType;
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public String toString() {
 		return "ReferenceEntry [value=" + value + ", dataType=" + dataType
 				+ "]";
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -52,6 +55,9 @@ public class ReferenceEntry implements Serializable {
 		return result;
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {

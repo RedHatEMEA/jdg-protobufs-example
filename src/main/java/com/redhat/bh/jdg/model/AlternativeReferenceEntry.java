@@ -13,7 +13,8 @@ public class AlternativeReferenceEntry implements Serializable {
 	private String dataType;
 	private String somethingElse;
 
-	public AlternativeReferenceEntry(String value, String dataType, String somethingElse) {
+	public AlternativeReferenceEntry(String value, String dataType,
+			String somethingElse) {
 		this.value = value;
 		this.dataType = dataType;
 		this.somethingElse = somethingElse;
@@ -42,15 +43,19 @@ public class AlternativeReferenceEntry implements Serializable {
 	public void setSomethingElse(String somethingElse) {
 		this.somethingElse = somethingElse;
 	}
-	
-	
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public String toString() {
 		return "AlternativeReferenceEntry [value=" + value + ", dataType="
 				+ dataType + ", somethingElse=" + somethingElse + "]";
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -63,6 +68,9 @@ public class AlternativeReferenceEntry implements Serializable {
 		return result;
 	}
 
+	/*
+	 * Yes, it's an auto-generated method. No, I don't care
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -98,7 +106,5 @@ public class AlternativeReferenceEntry implements Serializable {
 		}
 		return true;
 	}
-	
-	
 
 }
