@@ -1,0 +1,14 @@
+package rds;
+
+message ReferenceEntry
+{
+	required string value = 1;
+	required string dataType = 2;
+}
+
+message AlternativeReferenceEntry
+{
+	required string value = 1;
+	required string dataType = 2;
+	required string somethingElse = 3;
+}
