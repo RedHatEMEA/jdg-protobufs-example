@@ -4,7 +4,7 @@
 	<groupId>com.redhat.bh</groupId>
 	<artifactId>jdg-protobufs-example</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>BP JDG Test Harness</name>
+	<name>JDG Protobufs Test Harness</name>
 	<description>A test harness for Hot Rod calls to a JDG cluster</description>
 
 	<properties>
