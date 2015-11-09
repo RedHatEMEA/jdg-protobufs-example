@@ -11,11 +11,14 @@ import java.util.Properties;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
 import org.infinispan.client.hotrod.Search;
+import org.infinispan.client.hotrod.ServerStatistics;
 import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.client.hotrod.marshall.ProtoStreamMarshaller;
 import org.infinispan.protostream.FileDescriptorSource;
 import org.infinispan.protostream.MessageMarshaller;
 import org.infinispan.protostream.SerializationContext;
+import org.infinispan.protostream.annotations.ProtoSchemaBuilder;
+import org.infinispan.protostream.annotations.ProtoSchemaBuilderException;
 import org.infinispan.query.dsl.Query;
 import org.infinispan.query.dsl.QueryFactory;
 import org.infinispan.query.remote.client.ProtobufMetadataManagerConstants;
@@ -23,10 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.bh.jdg.common.ICommonProperties;
+import com.redhat.bh.jdg.model.ComplexMarketPriceEntry;
 
 public abstract class AbstractDataManager {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(AbstractDataManager.class);
+
+	private static final String PROTOFILE_MASK = "%s.proto";
 
 	protected RemoteCacheManager cacheContainer;
 
@@ -66,6 +72,7 @@ public abstract class AbstractDataManager {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <T> void registerProtobufMarshaller(String protoFile,
 			Class<?>... clazz) {
 		try {
@@ -84,7 +91,41 @@ public abstract class AbstractDataManager {
 			// register the schemas with the server too
 			RemoteCache<String, String> metadataCache = cacheContainer
 					.getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
+			
 			metadataCache.put(protoFile, this.readResource(protoFile));
+
+		} catch (Exception e1) {
+			LOGGER.error("Oops!", e1);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T> void registerProtobufMarshaller(Class<?>... clazz) {
+		try {
+
+			// register the schemas with the client
+			SerializationContext serCtx = ProtoStreamMarshaller
+					.getSerializationContext(this.cacheContainer);
+
+			ProtoSchemaBuilder psb;
+
+			for (Class<?> c : clazz) {
+
+				psb = new ProtoSchemaBuilder();
+
+				String protoFileName = String.format(PROTOFILE_MASK,
+						c.getSimpleName());
+
+				String generatedSchema = psb.fileName(protoFileName)
+						.packageName(c.getSimpleName()).addClass(c)
+						.build(serCtx);
+
+				// register the schemas with the server too
+				RemoteCache<String, String> metadataCache = cacheContainer
+						.getCache(ProtobufMetadataManagerConstants.PROTOBUF_METADATA_CACHE_NAME);
+				
+				metadataCache.put(protoFileName, generatedSchema);
+			}
 
 		} catch (Exception e1) {
 			LOGGER.error("Oops!", e1);
@@ -135,6 +176,10 @@ public abstract class AbstractDataManager {
 
 		List results = query.list();
 		return results;
+	}
+
+	public ServerStatistics getStats(RemoteCache cache) {
+		return cache.stats();
 	}
 
 }

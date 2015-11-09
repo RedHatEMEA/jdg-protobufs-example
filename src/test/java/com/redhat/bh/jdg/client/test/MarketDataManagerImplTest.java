@@ -1,19 +1,24 @@
 package com.redhat.bh.jdg.client.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import org.infinispan.client.hotrod.ServerStatistics;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.bh.jdg.client.IDataManager;
 import com.redhat.bh.jdg.client.impl.MarketDataManagerImpl;
+import com.redhat.bh.jdg.model.ComplexMarketPriceEntry;
 import com.redhat.bh.jdg.model.MarketPriceEntry;
 
 public class MarketDataManagerImplTest {
@@ -45,6 +50,7 @@ public class MarketDataManagerImplTest {
 
 	@After
 	public void setupTest() {
+		LOGGER.info(String.format("%d objects left in cache after test run", mdm.getCacheSize()));
 		clearCache();
 		LOGGER.info("Teardown complete");
 	}
@@ -60,6 +66,27 @@ public class MarketDataManagerImplTest {
 	public void testWrite() {
 		writeEntries(MAX_OBJECT_COUNT);
 		assertEquals(MAX_OBJECT_COUNT, mdm.getCacheSize());
+	}
+
+	@Test
+	public void testComplexWrite() {
+		writeComplexEntries(MAX_OBJECT_COUNT, "badgers", 7);
+		assertEquals(MAX_OBJECT_COUNT, mdm.getCacheSize());
+	}
+
+	@Test
+	public void testStats() {
+		writeEntries(MAX_OBJECT_COUNT);
+		assertEquals(MAX_OBJECT_COUNT, mdm.getCacheSize());
+
+		ServerStatistics stats = mdm.getStats();
+		assertNotNull(stats);
+
+		LOGGER.info("Statistics");
+		for (String key : stats.getStatsMap().keySet()) {
+			LOGGER.info("Key: " + key + "\t" + "Value: "
+					+ stats.getStatistic(key));
+		}
 	}
 
 	@Test
@@ -103,14 +130,51 @@ public class MarketDataManagerImplTest {
 		writeEntries(100, oil);
 		writeEntries(200, rubber);
 
-		List<Object> results = mdm.search("commodity", beans);
+		List<Object> results = mdm.search("commodity", beans,
+				MarketPriceEntry.class);
 		assertEquals(50, results.size());
+	}
+
+	@Test
+	public void testComplexSearch() {
+		String beans = "beans";
+		String oil = "oil";
+		String rubber = "rubber";
+
+		writeComplexEntries(5, beans, 5);
+		writeComplexEntries(10, oil, 10);
+		writeComplexEntries(20, rubber, 20);
+
+		List<Object> results = mdm.search("commodity", beans,
+				ComplexMarketPriceEntry.class);
+		assertEquals(5, results.size());
+
+		List<Object> results2 = mdm.searchByType(ComplexMarketPriceEntry.class);
+
+		assertEquals(35, results2.size());
+
 	}
 
 	private void writeEntries(int numEntries, String commodity) {
 		for (int i = 0; i < numEntries; i++) {
 			String key = String.format(BASE_KEY_FORMAT, BASE_KEY, commodity, i);
 			mdm.putEntry(key, new MarketPriceEntry((i * numEntries), commodity));
+			LOGGER.info("PUT: " + key);
+		}
+	}
+
+	private void writeComplexEntries(int numEntries, String commodity,
+			int numAvailable) {
+
+		Random r = new Random();
+
+		for (int i = 0; i < numEntries; i++) {
+
+			String key = String.format(BASE_KEY_FORMAT, BASE_KEY, commodity, i);
+
+			mdm.putEntry(key, new ComplexMarketPriceEntry((i * numEntries),
+					commodity, r.nextInt(numAvailable)));
+
 			LOGGER.info("PUT: " + key);
 		}
 	}
@@ -125,6 +189,24 @@ public class MarketDataManagerImplTest {
 			LOGGER.info("Cache entries: " + mdm.getCacheSize());
 		} catch (Exception e1) {
 			LOGGER.error("Something 'dun broked");
+		}
+
+	}
+
+	/**
+	 * Soak Test. Do not run.
+	 */
+	@Test
+	@Ignore
+	public void testSoak() {
+		for (int i = 0; i < 100; i++) {
+			writeEntries(i, TEST_COMMODITY);
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}

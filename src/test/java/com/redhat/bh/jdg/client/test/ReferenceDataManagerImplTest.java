@@ -1,13 +1,16 @@
 package com.redhat.bh.jdg.client.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.infinispan.client.hotrod.ServerStatistics;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +50,8 @@ public class ReferenceDataManagerImplTest {
 
 	@After
 	public void teardown() {
+		LOGGER.info(String.format("%d objects left in cache after test run",
+				rdm.getCacheSize()));
 		clearCache();
 		LOGGER.info("Teardown complete");
 	}
@@ -62,6 +67,21 @@ public class ReferenceDataManagerImplTest {
 	public void testWrite() {
 		writeEntries(MAX_OBJECT_COUNT, TEST_VALUE, TEST_DATATYPE);
 		assertEquals(MAX_OBJECT_COUNT, rdm.getCacheSize());
+	}
+
+	@Test
+	public void testStats() {
+		writeEntries(MAX_OBJECT_COUNT, TEST_VALUE, TEST_DATATYPE);
+		assertEquals(MAX_OBJECT_COUNT, rdm.getCacheSize());
+
+		ServerStatistics stats = rdm.getStats();
+		assertNotNull(stats);
+
+		LOGGER.info("Statistics");
+		for (String key : stats.getStatsMap().keySet()) {
+			LOGGER.info("Key: " + key + "\t" + "Value: "
+					+ stats.getStatistic(key));
+		}
 	}
 
 	@Test
@@ -109,13 +129,14 @@ public class ReferenceDataManagerImplTest {
 		writeEntries(15, value2, dt2);
 		writeEntries(20, value3, dt3);
 
-		List<Object> results = rdm.search("value", value1);
+		List<Object> results = rdm
+				.search("value", value1, ReferenceEntry.class);
 		assertEquals(10, results.size());
 
-		results = rdm.search("value", value2);
+		results = rdm.search("value", value2, ReferenceEntry.class);
 		assertEquals(15, results.size());
 
-		results = rdm.search("value", value3);
+		results = rdm.search("value", value3, ReferenceEntry.class);
 		assertEquals(20, results.size());
 	}
 
@@ -174,4 +195,21 @@ public class ReferenceDataManagerImplTest {
 
 	}
 
+	/**
+	 * Soak Test. Do not run.
+	 */
+	@Test
+	@Ignore
+	public void testSoak() {
+		for (int i = 0; i < 100; i++) {
+			writeEntries(i, TEST_VALUE, TEST_DATATYPE);
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
 }

@@ -2,6 +2,7 @@ package com.redhat.bh.jdg.client.impl;
 
 import java.util.List;
 
+import org.infinispan.client.hotrod.ServerStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ public class ReferenceDataManagerImpl extends AbstractDataManager implements
 
 	public ReferenceDataManagerImpl() {
 		super();
+		
 		registerProtobufMarshaller(
 				getProperty(ICommonProperties.PROTOBUF_RDS_FILE_KEY),
 				RDSMarshaller.class, ARDSMarshaller.class);
@@ -58,6 +60,10 @@ public class ReferenceDataManagerImpl extends AbstractDataManager implements
 
 	public List<Object> searchByType(Class<?> clazz) {
 		return search(getReferenceDataCache(), clazz);
+	}
+
+	public ServerStatistics getStats() {
+		return getStats(getReferenceDataCache());
 	}
 
 }
